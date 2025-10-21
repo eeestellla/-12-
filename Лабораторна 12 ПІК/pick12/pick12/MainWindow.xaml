@@ -1,0 +1,146 @@
+﻿<Window x:Class="pick12.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:pick12"
+        mc:Ignorable="d"
+        Title="File and Folder Manager" Height="700" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF1E1E1E">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#FF3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF4A4A4A"/>
+                    <Setter Property="BorderBrush" Value="#FF666666"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF2D2D2D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="#FF252526"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="250"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок - ВИЩЕ за кнопки -->
+        <TextBlock Grid.Row="0" Text="File and Folder Manager" 
+                   FontSize="24" FontWeight="Bold" Foreground="#FF4ECDC4"
+                   HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+        <!-- Панель кнопок -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <Button x:Name="SelectFilesButton" Content="📁 Select Files" 
+                    Click="SelectFilesButton_Click" Width="150"/>
+            <Button x:Name="BrowseFolderButton" Content="📂 Select Folder" 
+                    Click="BrowseFolderButton_Click" Width="150"/>
+            <Button Content="🗑️ Clear List" Click="ClearListButton_Click" Width="120"
+                    Background="#FF6D1B1B" BorderBrush="#FF8A2A2A"/>
+        </StackPanel>
+
+        <!-- Область для перетягування -->
+        <Border x:Name="DropArea" Grid.Row="2" Background="#FF2D2D30" BorderBrush="#FF4ECDC4" 
+                AllowDrop="True"
+                DragEnter="DropArea_DragEnter"
+                DragOver="DropArea_DragOver"
+                Drop="DropArea_Drop" Margin="0,0,0,46" Grid.RowSpan="2">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="📂 Drag &amp; Drop" 
+                           FontSize="20" FontWeight="Bold" Foreground="#FF4ECDC4"
+                           TextAlignment="Center" Margin="0,0,0,10"/>
+                <TextBlock Text="Drag files or folders here" 
+                           FontSize="16" Foreground="#FFCCCCCC" TextAlignment="Center"
+                           Margin="0,0,0,20"/>
+                <TextBlock Text="─ OR ─" 
+                           FontSize="14" Foreground="#FF888888" TextAlignment="Center"
+                           Margin="0,0,0,20"/>
+                <Button Content="Browse for Folder" Click="BrowseFolderButton_Click"
+                        Width="200" Background="#FF2C5F70" BorderBrush="#FF3A899E"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Статистика -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,10">
+            <TextBlock x:Name="StatsTextBlock" Text="Items: 0" Foreground="#FF4ECDC4"
+                       FontSize="16" Margin="0,0,20,0"/>
+            <TextBlock x:Name="FilesTextBlock" Text="Files: 0" Foreground="#FF45B7D1"
+                       FontSize="16" Margin="0,0,20,0"/>
+            <TextBlock x:Name="FoldersTextBlock" Text="Folders: 0" Foreground="#FF96CA2D"
+                       FontSize="16"/>
+        </StackPanel>
+
+        <!-- ListBox для відображення результатів -->
+        <Border Grid.Row="4" Background="#FF252526" BorderBrush="#FF555555" 
+                CornerRadius="8" Margin="0,10,0,0">
+            <ListBox x:Name="ItemsListBox">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#FF2D2D30" CornerRadius="6" Margin="2" Padding="10">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Icon}" FontSize="16" 
+                                           Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Path}" 
+                                               Foreground="White" FontSize="14"
+                                               TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Type}" 
+                                               Foreground="#FF888888" FontSize="12"
+                                               Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</Window>
+
